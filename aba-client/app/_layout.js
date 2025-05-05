@@ -1,6 +1,5 @@
-import { Slot } from 'expo-router';
-import AppNavigation from '../AppNavigation';
+import { Stack } from 'expo-router';
 
 export default function Layout() {
-  return <AppNavigation />;
+  return <Stack />;
 }
