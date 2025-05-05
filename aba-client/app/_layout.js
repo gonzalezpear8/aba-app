@@ -1,5 +1,6 @@
-import Login from './Login';
+import { Slot } from 'expo-router';
+import AppNavigation from '../AppNavigation';
 
-export default function App() {
-  return <Login />;
+export default function Layout() {
+  return <AppNavigation />;
 }
