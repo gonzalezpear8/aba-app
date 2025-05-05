@@ -1,0 +1,5 @@
+[
+    { "id": 1, "name": "John Doe", "dob": "2015-03-25", "goals": ["Eye contact", "Yes/No responses"] },
+    { "id": 2, "name": "Jane Smith", "dob": "2014-07-18", "goals": ["Following instructions", "Toilet training"] }
+  ]
+  
