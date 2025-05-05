@@ -5,10 +5,11 @@ import axios from 'axios';
 export default function Login({ navigation }) {
   const [username, setUsername] = useState('');
   const [password, setPassword] = useState('');
+  const API_URL = process.env.EXPO_PUBLIC_API_URL;
 
   const handleLogin = async () => {
     try {
-      const res = await axios.post('http://localhost:5000/api/auth/login', {
+      const res = await axios.post(`${API_URL}/api/auth/login`, {
         username,
         password,
       });
@@ -18,6 +19,7 @@ export default function Login({ navigation }) {
       Alert.alert('Login Failed', 'Check your credentials');
     }
   };
+  
 
   return (
     <View style={styles.container}>
