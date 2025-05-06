@@ -2,10 +2,12 @@ import React, { useState } from 'react';
 import { View, Text, TextInput, Button, StyleSheet, Alert } from 'react-native';
 import axios from 'axios';
 import AsyncStorage from '@react-native-async-storage/async-storage';
+import { useNavigation } from '@react-navigation/native'; // ✅ Add this
 
-export default function Login({ navigation }) {
+export default function Login() {
   const [username, setUsername] = useState('');
   const [password, setPassword] = useState('');
+  const navigation = useNavigation(); // ✅ Use hook instead of prop
   const API_URL = process.env.EXPO_PUBLIC_API_URL;
 
   const handleLogin = async () => {
@@ -14,19 +16,15 @@ export default function Login({ navigation }) {
         username,
         password,
       });
-  
-      // Store token in AsyncStorage
+
       await AsyncStorage.setItem('token', res.data.token);
-  
-      // Navigate to dashboard
-      navigation.navigate('Dashboard');
-  
+
       Alert.alert('Login Successful!');
+      navigation.navigate('Dashboard'); // ✅ works now
     } catch (err) {
       Alert.alert('Login Failed', 'Check your credentials');
     }
   };
-  
 
   return (
     <View style={styles.container}>
