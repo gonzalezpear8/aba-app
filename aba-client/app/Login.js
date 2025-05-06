@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import { View, Text, TextInput, Button, StyleSheet, Alert } from 'react-native';
 import axios from 'axios';
+import AsyncStorage from '@react-native-async-storage/async-storage';
 
 export default function Login({ navigation }) {
   const [username, setUsername] = useState('');
@@ -13,8 +14,10 @@ export default function Login({ navigation }) {
         username,
         password,
       });
+  
+      await AsyncStorage.setItem('token', res.data.token);  // 👈 Store token
       Alert.alert('Login Successful!');
-      // You’ll later store res.data.token and redirect to Patients screen
+      navigation.replace('Dashboard'); // 👈 Navigate to Dashboard
     } catch (err) {
       Alert.alert('Login Failed', 'Check your credentials');
     }
