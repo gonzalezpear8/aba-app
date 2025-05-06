@@ -1,5 +1,6 @@
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { Button } from 'react-native';
+import { View, Text } from 'react-native';
 
 export default function Dashboard() {
   const handleLogout = async () => {
