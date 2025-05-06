@@ -15,9 +15,13 @@ export default function Login({ navigation }) {
         password,
       });
   
-      await AsyncStorage.setItem('token', res.data.token);  // 👈 Store token
+      // Store token in AsyncStorage
+      await AsyncStorage.setItem('token', res.data.token);
+  
+      // Navigate to dashboard
+      navigation.navigate('Dashboard');
+  
       Alert.alert('Login Successful!');
-      navigation.replace('Dashboard'); // 👈 Navigate to Dashboard
     } catch (err) {
       Alert.alert('Login Failed', 'Check your credentials');
     }
