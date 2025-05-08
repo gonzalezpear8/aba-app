@@ -1,9 +1,9 @@
-import React, { useState } from 'react';
+import React, { useState, useContext } from 'react';
 import { View, Text, TextInput, Button, StyleSheet, Alert, TouchableOpacity } from 'react-native';
 import { Picker } from '@react-native-picker/picker';
 import axios from 'axios';
-import AsyncStorage from '@react-native-async-storage/async-storage';
 import { useNavigation } from '@react-navigation/native';
+import { AuthContext } from './AuthContext';
 
 export default function Login() {
   const [isRegistering, setIsRegistering] = useState(false);
@@ -16,6 +16,7 @@ export default function Login() {
   
   const navigation = useNavigation();
   const API_URL = process.env.EXPO_PUBLIC_API_URL;
+  const { login } = useContext(AuthContext);
 
   const handleLogin = async () => {
     try {
@@ -23,29 +24,11 @@ export default function Login() {
         username,
         password,
       });
-      console.log(res.data);
 
-      await AsyncStorage.setItem('token', res.data.token);
-      await AsyncStorage.setItem('userRole', res.data.role);
-      await AsyncStorage.setItem('userId', res.data.id.toString());
+      await login(res.data.token, res.data.role, res.data.id);
 
       Alert.alert('Success', 'Login successful!');
-      
-      // Navigate based on role
-      switch (res.data.role) {
-        case 'admin':
-          console.log('Navigating to AdminDashboard');
-          navigation.navigate('AdminDashboard');
-          break;
-        case 'therapist':
-          navigation.navigate('TherapistDashboard');
-          break;
-        case 'patient':
-          navigation.navigate('PatientDashboard');
-          break;
-        default:
-          navigation.navigate('Dashboard');
-      }
+      // Navigation will be handled by AppNavigation context
     } catch (err) {
       Alert.alert('Login Failed', 'Check your credentials');
     }

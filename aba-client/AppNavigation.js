@@ -1,34 +1,18 @@
 // AppNavigation.js
-import React, { useEffect, useState } from 'react';
+import React, { useContext } from 'react';
 import { NavigationContainer } from '@react-navigation/native';
 import { createNativeStackNavigator } from '@react-navigation/native-stack';
-import AsyncStorage from '@react-native-async-storage/async-storage';
 import LoginScreen from './app/LoginScreen';
 import Dashboard from './app/Dashboard';
 import AdminDashboard from './app/AdminDashboard';
 import TherapistDashboard from './app/TherapistDashboard';
 import PatientDashboard from './app/PatientDashboard';
-
+import { AuthProvider, AuthContext } from './app/AuthContext';
 
 const Stack = createNativeStackNavigator();
 
-export default function AppNavigation() {
-  const [isAuthenticated, setIsAuthenticated] = useState(false);
-  const [userRole, setUserRole] = useState(null);
-
-  // Re-check auth state every time the navigator is focused
-  useEffect(() => {
-    const checkAuth = async () => {
-      const token = await AsyncStorage.getItem('token');
-      const role = await AsyncStorage.getItem('userRole');
-      setIsAuthenticated(!!token);
-      setUserRole(role);
-    };
-
-    const interval = setInterval(checkAuth, 500); // Poll every 500ms
-
-    return () => clearInterval(interval);
-  }, []);
+function AppStack() {
+  const { isAuthenticated, userRole } = useContext(AuthContext);
 
   const getInitialRoute = () => {
     if (!isAuthenticated) return 'Login';
@@ -46,7 +30,7 @@ export default function AppNavigation() {
 
   return (
     <NavigationContainer>
-      <Stack.Navigator 
+      <Stack.Navigator
         initialRouteName={getInitialRoute()}
         screenOptions={{ headerShown: false }}
       >
@@ -62,5 +46,13 @@ export default function AppNavigation() {
         )}
       </Stack.Navigator>
     </NavigationContainer>
+  );
+}
+
+export default function AppNavigation() {
+  return (
+    <AuthProvider>
+      <AppStack />
+    </AuthProvider>
   );
 }
