@@ -10,22 +10,48 @@ const Stack = createNativeStackNavigator();
 
 export default function AppNavigation() {
   const [isAuthenticated, setIsAuthenticated] = useState(false);
+  const [userRole, setUserRole] = useState(null);
 
   useEffect(() => {
     const checkAuth = async () => {
       const token = await AsyncStorage.getItem('token');
+      const role = await AsyncStorage.getItem('userRole');
       setIsAuthenticated(!!token);
+      setUserRole(role);
     };
     checkAuth();
   }, []);
 
+  const getInitialRoute = () => {
+    if (!isAuthenticated) return 'Login';
+    switch (userRole) {
+      case 'admin':
+        return 'AdminDashboard';
+      case 'therapist':
+        return 'TherapistDashboard';
+      case 'patient':
+        return 'PatientDashboard';
+      default:
+        return 'Dashboard';
+    }
+  };
+
   return (
     <NavigationContainer>
-      <Stack.Navigator screenOptions={{ headerShown: false }}>
-        {isAuthenticated ? (
-          <Stack.Screen name="Dashboard" component={Dashboard} />
-        ) : (
+      <Stack.Navigator 
+        initialRouteName={getInitialRoute()}
+        screenOptions={{ headerShown: false }}
+      >
+        {!isAuthenticated ? (
           <Stack.Screen name="Login" component={LoginScreen} />
+        ) : (
+          <>
+            <Stack.Screen name="Dashboard" component={Dashboard} />
+            {/* Add your role-specific screens here */}
+            {/* <Stack.Screen name="AdminDashboard" component={AdminDashboard} />
+            <Stack.Screen name="TherapistDashboard" component={TherapistDashboard} />
+            <Stack.Screen name="PatientDashboard" component={PatientDashboard} /> */}
+          </>
         )}
       </Stack.Navigator>
     </NavigationContainer>
