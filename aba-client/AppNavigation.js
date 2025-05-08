@@ -13,36 +13,26 @@ const Stack = createNativeStackNavigator();
 
 function AppStack() {
   const { isAuthenticated, userRole } = useContext(AuthContext);
-
-  const getInitialRoute = () => {
-    if (!isAuthenticated) return 'Login';
-    switch (userRole) {
-      case 'admin':
-        return 'AdminDashboard';
-      case 'therapist':
-        return 'TherapistDashboard';
-      case 'patient':
-        return 'PatientDashboard';
-      default:
-        return 'Dashboard';
-    }
-  };
+  console.log('Auth state:', { isAuthenticated, userRole }); // Debug log
 
   return (
     <NavigationContainer>
-      <Stack.Navigator
-        initialRouteName={getInitialRoute()}
-        screenOptions={{ headerShown: false }}
-      >
-        {!isAuthenticated ? (
+      <Stack.Navigator screenOptions={{ headerShown: false }}>
+        {!isAuthenticated && (
           <Stack.Screen name="Login" component={LoginScreen} />
-        ) : (
-          <>
-            <Stack.Screen name="Dashboard" component={Dashboard} />
-            <Stack.Screen name="AdminDashboard" component={AdminDashboard} />
-            <Stack.Screen name="TherapistDashboard" component={TherapistDashboard} />
-            <Stack.Screen name="PatientDashboard" component={PatientDashboard} />
-          </>
+        )}
+        {isAuthenticated && userRole === 'admin' && (
+          <Stack.Screen name="AdminDashboard" component={AdminDashboard} />
+        )}
+        {isAuthenticated && userRole === 'therapist' && (
+          <Stack.Screen name="TherapistDashboard" component={TherapistDashboard} />
+        )}
+        {isAuthenticated && userRole === 'patient' && (
+          <Stack.Screen name="PatientDashboard" component={PatientDashboard} />
+        )}
+        {/* Fallback */}
+        {isAuthenticated && !['admin', 'therapist', 'patient'].includes(userRole) && (
+          <Stack.Screen name="Dashboard" component={Dashboard} />
         )}
       </Stack.Navigator>
     </NavigationContainer>
