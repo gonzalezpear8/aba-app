@@ -35,23 +35,15 @@ router.post('/login', async (req, res) => {
       expiresIn: '1d'
     });
 
-    res.json({ token, role: user.role, id: user.id });
-    switch (res.data.role) {
-      case 'admin':
-        navigation.navigate('AdminDashboard');
-        break;
-      case 'therapist':
-        navigation.navigate('TherapistDashboard');
-        break;
-      case 'patient':
-        navigation.navigate('PatientDashboard');
-        break;
-      default:
-        navigation.navigate('Dashboard');
-    }
+    // Only send one response and return immediately
+    return res.json({ token, role: user.role, id: user.id });
+
   } catch (err) {
     console.error(err);
-    res.status(500).send('Server error');
+    // Only send error if a response hasn't already been sent
+    if (!res.headersSent) {
+      res.status(500).send('Server error');
+    }
   }
 });
 
