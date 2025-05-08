@@ -23,6 +23,7 @@ export default function Login() {
         username,
         password,
       });
+      console.log(res.data);
 
       await AsyncStorage.setItem('token', res.data.token);
       await AsyncStorage.setItem('userRole', res.data.role);
