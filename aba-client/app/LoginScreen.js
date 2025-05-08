@@ -34,6 +34,7 @@ export default function Login() {
       // Navigate based on role
       switch (res.data.role) {
         case 'admin':
+          console.log('Navigating to AdminDashboard');
           navigation.navigate('AdminDashboard');
           break;
         case 'therapist':
