@@ -16,6 +16,7 @@ export default function AppNavigation() {
   const [isAuthenticated, setIsAuthenticated] = useState(false);
   const [userRole, setUserRole] = useState(null);
 
+  // Re-check auth state every time the navigator is focused
   useEffect(() => {
     const checkAuth = async () => {
       const token = await AsyncStorage.getItem('token');
@@ -23,7 +24,10 @@ export default function AppNavigation() {
       setIsAuthenticated(!!token);
       setUserRole(role);
     };
-    checkAuth();
+
+    const interval = setInterval(checkAuth, 500); // Poll every 500ms
+
+    return () => clearInterval(interval);
   }, []);
 
   const getInitialRoute = () => {
