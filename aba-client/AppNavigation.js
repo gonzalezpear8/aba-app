@@ -5,6 +5,10 @@ import { createNativeStackNavigator } from '@react-navigation/native-stack';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import LoginScreen from './app/LoginScreen';
 import Dashboard from './app/Dashboard';
+import AdminDashboard from './app/AdminDashboard';
+import TherapistDashboard from './app/TherapistDashboard';
+import PatientDashboard from './app/PatientDashboard';
+
 
 const Stack = createNativeStackNavigator();
 
@@ -47,10 +51,9 @@ export default function AppNavigation() {
         ) : (
           <>
             <Stack.Screen name="Dashboard" component={Dashboard} />
-            {/* Add your role-specific screens here */}
-            {/* <Stack.Screen name="AdminDashboard" component={AdminDashboard} />
+            <Stack.Screen name="AdminDashboard" component={AdminDashboard} />
             <Stack.Screen name="TherapistDashboard" component={TherapistDashboard} />
-            <Stack.Screen name="PatientDashboard" component={PatientDashboard} /> */}
+            <Stack.Screen name="PatientDashboard" component={PatientDashboard} />
           </>
         )}
       </Stack.Navigator>

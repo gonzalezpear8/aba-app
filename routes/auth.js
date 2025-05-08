@@ -36,6 +36,19 @@ router.post('/login', async (req, res) => {
     });
 
     res.json({ token, role: user.role, id: user.id });
+    switch (res.data.role) {
+      case 'admin':
+        navigation.navigate('AdminDashboard');
+        break;
+      case 'therapist':
+        navigation.navigate('TherapistDashboard');
+        break;
+      case 'patient':
+        navigation.navigate('PatientDashboard');
+        break;
+      default:
+        navigation.navigate('Dashboard');
+    }
   } catch (err) {
     console.error(err);
     res.status(500).send('Server error');
