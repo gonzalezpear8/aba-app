@@ -6,7 +6,6 @@ const router = express.Router();
 
 router.post('/login', async (req, res) => {
   const { username, password } = req.body;
-
   const db = req.app.get('db'); // Grab DB from app context
 
   try {
@@ -14,12 +13,19 @@ router.post('/login', async (req, res) => {
     const result = await db.query('SELECT * FROM users WHERE username = $1', [username]);
     const user = result.rows[0];
 
+    console.log('Login attempt for:', username);
     if (!user) {
+      console.log('User not found');
       return res.status(401).json({ message: 'Invalid credentials' });
     }
 
+    console.log('Password from form:', password);
+    console.log('Password hash from DB:', user.password);
+
     // Compare password
     const isMatch = await bcrypt.compare(password, user.password);
+    console.log('Password match result:', isMatch);
+
     if (!isMatch) {
       return res.status(401).json({ message: 'Invalid credentials' });
     }

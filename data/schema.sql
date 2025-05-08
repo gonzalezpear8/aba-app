@@ -1,4 +1,4 @@
--- Create users table
+-- users table
 CREATE TABLE IF NOT EXISTS users (
     id SERIAL PRIMARY KEY,
     username VARCHAR(50) UNIQUE NOT NULL,
@@ -7,7 +7,7 @@ CREATE TABLE IF NOT EXISTS users (
     created_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP
 );
 
--- Create therapists table
+-- therapists table
 CREATE TABLE IF NOT EXISTS therapists (
     id SERIAL PRIMARY KEY,
     name VARCHAR(100) NOT NULL,
@@ -15,7 +15,7 @@ CREATE TABLE IF NOT EXISTS therapists (
     FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE
 );
 
--- Create patients table
+-- patients table
 CREATE TABLE IF NOT EXISTS patients (
     id SERIAL PRIMARY KEY,
     name VARCHAR(100) NOT NULL,
@@ -27,7 +27,7 @@ CREATE TABLE IF NOT EXISTS patients (
     FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE
 );
 
--- Create sessions table
+-- sessions table
 CREATE TABLE IF NOT EXISTS sessions (
     id SERIAL PRIMARY KEY,
     patient_id INTEGER NOT NULL,
@@ -38,7 +38,7 @@ CREATE TABLE IF NOT EXISTS sessions (
     FOREIGN KEY (therapist_id) REFERENCES therapists(id) ON DELETE CASCADE
 );
 
--- Create programs table
+-- programs table
 CREATE TABLE IF NOT EXISTS programs (
     id SERIAL PRIMARY KEY,
     name VARCHAR(100) NOT NULL,
@@ -48,7 +48,7 @@ CREATE TABLE IF NOT EXISTS programs (
     FOREIGN KEY (created_by) REFERENCES therapists(id) ON DELETE CASCADE
 );
 
--- Create targets table
+-- targets table
 CREATE TABLE IF NOT EXISTS targets (
     id SERIAL PRIMARY KEY,
     program_id INTEGER NOT NULL,
@@ -58,7 +58,7 @@ CREATE TABLE IF NOT EXISTS targets (
     FOREIGN KEY (program_id) REFERENCES programs(id) ON DELETE CASCADE
 );
 
--- Create session_results table
+-- session_results table
 CREATE TABLE IF NOT EXISTS session_results (
     id SERIAL PRIMARY KEY,
     session_id INTEGER NOT NULL,
@@ -72,4 +72,4 @@ CREATE TABLE IF NOT EXISTS session_results (
 -- Create initial admin user (password: admin123)
 INSERT INTO users (username, password, role) 
 VALUES ('admin', '$2b$10$rMbGJRzp6qQrBj.FiBI0H.tFYG8kxGBqIhqJHNqnU4DPWt0yRg2Hy', 'admin')
-ON CONFLICT (username) DO NOTHING; 
+ON CONFLICT (username) DO NOTHING;
