@@ -12,6 +12,7 @@ CREATE TABLE IF NOT EXISTS patients (
     id SERIAL PRIMARY KEY,
     name VARCHAR(100) NOT NULL,
     dob DATE,
+    gender VARCHAR(10) CHECK (gender IN ('male', 'female')),
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
 );
 
@@ -55,18 +56,17 @@ CREATE TABLE IF NOT EXISTS sessions (
     id SERIAL PRIMARY KEY,
     patient_id INTEGER REFERENCES patients(id) ON DELETE CASCADE,
     therapist_id INTEGER REFERENCES users(id) ON DELETE CASCADE,
-    goal_id INTEGER REFERENCES goals(id) ON DELETE CASCADE,
-    started_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+    name TEXT NOT NULL, -- e.g. "Session 2024-06-08 #3"
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    note TEXT
 );
 
 -- Session Results
 CREATE TABLE IF NOT EXISTS session_results (
     id SERIAL PRIMARY KEY,
     session_id INTEGER REFERENCES sessions(id) ON DELETE CASCADE,
-    image_id INTEGER REFERENCES goal_images(id) ON DELETE CASCADE,
-    selected_image_id INTEGER REFERENCES goal_images(id),
-    correct BOOLEAN,
-    responded_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+    goal_id INTEGER REFERENCES goals(id) ON DELETE CASCADE,
+    outcome BOOLEAN
 );
 
 -- Create initial admin user (password: admin123, hashed with bcrypt for example)

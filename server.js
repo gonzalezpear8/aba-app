@@ -104,11 +104,11 @@ app.post('/api/admin/create-therapist', adminAuth, async (req, res) => {
 
 // Admin: Create patient (protected)
 app.post('/api/admin/create-patient', adminAuth, async (req, res) => {
-  const { name, dob } = req.body;
+  const { name, dob, gender } = req.body;
   try {
     const { rows } = await pool.query(
-      'INSERT INTO patients (name, dob) VALUES ($1, $2) RETURNING id, name, dob',
-      [name, dob]
+      'INSERT INTO patients (name, dob, gender) VALUES ($1, $2, $3) RETURNING id, name, dob, gender',
+      [name, dob, gender]
     );
     res.status(201).json({ patient: rows[0] });
   } catch (err) {
@@ -154,7 +154,7 @@ app.get('/api/admin/therapists', adminAuth, async (req, res) => {
 // Admin: Get all patients (protected)
 app.get('/api/admin/patients', adminAuth, async (req, res) => {
   try {
-    const { rows } = await pool.query('SELECT id, name, dob FROM patients');
+    const { rows } = await pool.query('SELECT id, name, dob, gender FROM patients');
     res.json({ patients: rows });
   } catch (err) {
     console.error(err);
@@ -181,7 +181,7 @@ app.get('/api/therapist/patients', therapistAuth, async (req, res) => {
   try {
     const therapistId = req.user.id;
     const { rows } = await pool.query(
-      `SELECT p.id, p.name, p.dob
+      `SELECT p.id, p.name, p.dob, p.gender
        FROM patients p
        JOIN therapist_patient tp ON tp.patient_id = p.id
        WHERE tp.therapist_id = $1`,
@@ -484,6 +484,139 @@ app.get('/api/therapist/goal/:id/images', therapistAuth, async (req, res) => {
   } catch (err) {
     console.error(err);
     res.status(500).json({ error: 'Server error' });
+  }
+});
+
+// Therapist: Create a new session (batch run)
+app.post('/api/therapist/session', therapistAuth, async (req, res) => {
+  const { patient_id, goal_ids } = req.body;
+  if (!patient_id || !Array.isArray(goal_ids) || goal_ids.length === 0) {
+    return res.status(400).json({ error: 'patient_id and goal_ids[] required' });
+  }
+  const client = await pool.connect();
+  try {
+    await client.query('BEGIN');
+    // Count today's sessions for this patient
+    const today = new Date();
+    today.setHours(0,0,0,0);
+    const todayStr = today.toISOString().slice(0,10);
+    const { rows: countRows } = await client.query(
+      `SELECT COUNT(*) FROM sessions WHERE patient_id = $1 AND DATE(created_at) = $2`,
+      [patient_id, todayStr]
+    );
+    const sessionNum = parseInt(countRows[0].count) + 1;
+    const sessionName = `Session ${todayStr} #${sessionNum}`;
+    // Create session
+    const { rows: sessionRows } = await client.query(
+      `INSERT INTO sessions (patient_id, therapist_id, name) VALUES ($1, $2, $3) RETURNING *`,
+      [patient_id, req.user.id, sessionName]
+    );
+    const session = sessionRows[0];
+    await client.query('COMMIT');
+    res.json({ session_id: session.id, name: session.name, created_at: session.created_at });
+  } catch (err) {
+    await client.query('ROLLBACK');
+    console.error(err);
+    res.status(500).json({ error: 'Server error' });
+  } finally {
+    client.release();
+  }
+});
+
+// Therapist: Record a result for a goal in a session
+app.post('/api/therapist/session/:session_id/result', therapistAuth, async (req, res) => {
+  const session_id = req.params.session_id;
+  const { goal_id, outcome } = req.body;
+  if (!goal_id || typeof outcome !== 'boolean') {
+    return res.status(400).json({ error: 'goal_id and outcome (boolean) required' });
+  }
+  try {
+    // Optionally, check session ownership
+    await pool.query(
+      `INSERT INTO session_results (session_id, goal_id, outcome) VALUES ($1, $2, $3)`,
+      [session_id, goal_id, outcome]
+    );
+    res.json({ success: true });
+  } catch (err) {
+    console.error(err);
+    res.status(500).json({ error: 'Server error' });
+  }
+});
+
+// Therapist: Add or update a note for a session
+app.put('/api/therapist/session/:session_id/note', therapistAuth, async (req, res) => {
+  const session_id = req.params.session_id;
+  const { note } = req.body;
+  try {
+    await pool.query(
+      `UPDATE sessions SET note = $1 WHERE id = $2`,
+      [note, session_id]
+    );
+    res.json({ success: true });
+  } catch (err) {
+    console.error(err);
+    res.status(500).json({ error: 'Server error' });
+  }
+});
+
+// Therapist: Get session history for a patient (with results)
+app.get('/api/therapist/patient/:id/sessions', therapistAuth, async (req, res) => {
+  const patient_id = req.params.id;
+  try {
+    // Get sessions for this patient (by this therapist)
+    const { rows: sessions } = await pool.query(
+      `SELECT * FROM sessions WHERE patient_id = $1 AND therapist_id = $2 ORDER BY created_at DESC`,
+      [patient_id, req.user.id]
+    );
+    // For each session, get results
+    const sessionIds = sessions.map(s => s.id);
+    let results = [];
+    if (sessionIds.length > 0) {
+      const { rows: resultRows } = await pool.query(
+        `SELECT sr.*, g.name AS goal_name
+         FROM session_results sr
+         JOIN goals g ON sr.goal_id = g.id
+         WHERE sr.session_id = ANY($1::int[])`,
+        [sessionIds]
+      );
+      results = resultRows;
+    }
+    // Attach results to sessions
+    const sessionsWithResults = sessions.map(session => ({
+      ...session,
+      results: results.filter(r => r.session_id === session.id)
+    }));
+    res.json({ sessions: sessionsWithResults });
+  } catch (err) {
+    console.error(err);
+    res.status(500).json({ error: 'Server error' });
+  }
+});
+
+// Therapist: Record multiple results for a session (batch)
+app.post('/api/therapist/session/:session_id/results', therapistAuth, async (req, res) => {
+  const session_id = req.params.session_id;
+  const { results } = req.body; // [{goalId, correct}]
+  if (!Array.isArray(results)) {
+    return res.status(400).json({ error: 'results[] required' });
+  }
+  const client = await pool.connect();
+  try {
+    await client.query('BEGIN');
+    for (const r of results) {
+      await client.query(
+        `INSERT INTO session_results (session_id, goal_id, outcome) VALUES ($1, $2, $3)`,
+        [session_id, r.goalId, r.correct]
+      );
+    }
+    await client.query('COMMIT');
+    res.json({ success: true });
+  } catch (err) {
+    await client.query('ROLLBACK');
+    console.error(err);
+    res.status(500).json({ error: 'Server error' });
+  } finally {
+    client.release();
   }
 });
 

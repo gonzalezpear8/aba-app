@@ -163,91 +163,296 @@ function CreateGoalModal({ onClose, setMessage, onGoalCreated }) {
       alignItems: 'center', 
       justifyContent: 'center' 
     }}>
-      <div style={{ 
-        background: '#fff', 
-        padding: 24, 
-        borderRadius: 8, 
-        maxWidth: 600, 
-        maxHeight: '80vh', 
-        overflow: 'auto' 
+      <div style={{
+        background: '#fff',
+        padding: '36px 32px 28px 32px',
+        borderRadius: 18,
+        maxWidth: 480,
+        width: '100%',
+        boxShadow: '0 8px 40px rgba(99,102,241,0.13)',
+        fontFamily: 'inherit',
+        textAlign: 'center',
+        overflow: 'auto',
+        maxHeight: '90vh',
       }}>
-        <h3>Create New Goal</h3>
+        <div style={{ fontWeight: 800, fontSize: 26, marginBottom: 24, color: '#6366f1', letterSpacing: 1 }}>Create New Goal</div>
         <form onSubmit={handleCreateGoal}>
-          <div style={{ marginBottom: 16 }}>
-            <label>Goal Name:</label><br />
-            <input 
-              type="text" 
-              value={newGoalName} 
-              onChange={e => setNewGoalName(e.target.value)} 
-              required 
-              style={{ width: '100%', padding: 8 }}
+          <div style={{ marginBottom: 22, textAlign: 'left' }}>
+            <label style={{ fontWeight: 700, fontSize: 17, color: '#22223b', marginBottom: 8, display: 'block' }}>Goal Name:</label>
+            <input
+              type="text"
+              value={newGoalName}
+              onChange={e => setNewGoalName(e.target.value)}
+              required
+              style={{
+                width: '100%',
+                padding: '14px 16px',
+                borderRadius: 10,
+                border: '1.5px solid #c7d2fe',
+                fontSize: 17,
+                outline: 'none',
+                marginTop: 6,
+                marginBottom: 0,
+                background: '#f3f4f6',
+                fontWeight: 600,
+                color: '#374151',
+                boxSizing: 'border-box',
+              }}
             />
           </div>
-          <div style={{ marginBottom: 16 }}>
-            <label>Description:</label><br />
-            <textarea 
-              value={newGoalDesc} 
-              onChange={e => setNewGoalDesc(e.target.value)} 
-              style={{ width: '100%', padding: 8, minHeight: 60 }}
+          <div style={{ marginBottom: 22, textAlign: 'left' }}>
+            <label style={{ fontWeight: 700, fontSize: 17, color: '#22223b', marginBottom: 8, display: 'block' }}>Description:</label>
+            <textarea
+              value={newGoalDesc}
+              onChange={e => setNewGoalDesc(e.target.value)}
+              style={{
+                width: '100%',
+                padding: '14px 16px',
+                borderRadius: 10,
+                border: '1.5px solid #c7d2fe',
+                fontSize: 17,
+                outline: 'none',
+                marginTop: 6,
+                minHeight: 60,
+                background: '#f3f4f6',
+                fontWeight: 500,
+                color: '#374151',
+                boxSizing: 'border-box',
+              }}
             />
           </div>
+          <div style={{ marginBottom: 22, textAlign: 'left' }}>
+            <label style={{ fontWeight: 700, fontSize: 17, color: '#22223b', marginBottom: 8, display: 'block' }}>Images (2+):</label>
+            <div style={{ marginBottom: 10 }}>
+              <button type="button" onClick={handleOpenImageSelector} style={{
+                marginRight: 8,
+                padding: '8px 16px',
+                background: 'linear-gradient(90deg, #6366f1 0%, #a5b4fc 100%)',
+                color: '#fff',
+                border: 'none',
+                borderRadius: 8,
+                fontWeight: 700,
+                fontSize: 15,
+                boxShadow: '0 2px 8px rgba(99,102,241,0.10)',
+                cursor: 'pointer',
+                transition: 'transform 0.1s, background 0.2s',
+              }}
+                onMouseDown={e => e.currentTarget.style.transform = 'scale(0.97)'}
+                onMouseUp={e => e.currentTarget.style.transform = 'scale(1)'}
+                onMouseOver={e => e.currentTarget.style.background = 'linear-gradient(90deg, #4f46e5 0%, #818cf8 100%)'}
+                onMouseOut={e => e.currentTarget.style.background = 'linear-gradient(90deg, #6366f1 0%, #a5b4fc 100%)'}
+              >Select from Image Bank</button>
+              <span style={{ fontSize: 13, color: '#666' }}>or add manually below</span>
+            </div>
+          </div>
           <div style={{ marginBottom: 16 }}>
-            <label>Images (2+):</label>
-            <div style={{ marginBottom: 8 }}>
-              <button type="button" onClick={handleOpenImageSelector} style={{ marginRight: 8, padding: '4px 8px' }}>Select from Image Bank</button>
-              <span style={{ fontSize: 12, color: '#666' }}>or add manually below</span>
+            {/* Image input header row */}
+            <div style={{
+              display: 'flex',
+              flexWrap: 'wrap',
+              alignItems: 'center',
+              gap: 10,
+              marginBottom: 6,
+              fontWeight: 600,
+              color: '#6366f1',
+              fontSize: 15,
+            }}>
+              <span style={{ flex: 2, minWidth: 120 }}>File</span>
+              <span style={{ flex: 3, minWidth: 100 }}>Image URL</span>
+              <span style={{ flex: 2, minWidth: 80 }}>Label</span>
+              <span style={{ width: 60, textAlign: 'center' }}>Correct?</span>
+              <span style={{ width: 30 }}></span>
             </div>
             {newGoalImages.map((img, idx) => (
-              <div key={idx} style={{ marginBottom: 8, border: '1px solid #ccc', padding: 8, borderRadius: 4, display: 'flex', alignItems: 'center', gap: 8 }}>
-                <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center' }}>
-                  {img.url && (
-                    <img 
-                      src={img.url.startsWith('http') ? img.url : `${img.url}`} 
-                      alt="preview" 
-                      style={{ width: 48, height: 48, objectFit: 'cover', borderRadius: 4, marginBottom: 4 }} 
-                    />
-                  )}
+              <div
+                key={idx}
+                style={{
+                  marginBottom: 14,
+                  background: '#f3f4f6',
+                  border: '1.5px solid #e0e7ff',
+                  borderRadius: 12,
+                  padding: '16px 14px',
+                  display: 'flex',
+                  flexWrap: 'nowrap',
+                  alignItems: 'center',
+                  gap: 10,
+                  boxShadow: '0 1px 4px rgba(99,102,241,0.06)',
+                  maxWidth: '100%',
+                }}
+              >
+                <div style={{ flex: '0 0 90px', position: 'relative' }}>
                   <input
+                    id={`file-input-${idx}`}
                     type="file"
                     accept="image/*"
-                    onChange={e => {
-                      if (e.target.files && e.target.files[0]) handleImageFile(idx, e.target.files[0]);
+                    onChange={e => handleImageFile(idx, e.target.files[0])}
+                    style={{
+                      opacity: 0,
+                      position: 'absolute',
+                      left: 0,
+                      top: 0,
+                      width: '100%',
+                      height: '100%',
+                      cursor: 'pointer',
+                      zIndex: 2,
                     }}
-                    style={{ fontSize: 12 }}
                   />
+                  <label
+                    htmlFor={`file-input-${idx}`}
+                    style={{
+                      display: 'block',
+                      width: 90,
+                      padding: '8px 0',
+                      background: 'linear-gradient(90deg, #6366f1 0%, #a5b4fc 100%)',
+                      color: '#fff',
+                      borderRadius: 8,
+                      fontWeight: 700,
+                      fontSize: 15,
+                      textAlign: 'center',
+                      cursor: 'pointer',
+                      position: 'relative',
+                      zIndex: 1,
+                    }}
+                  >
+                    {(img.url && !img.url.startsWith('http')) ? 'File Selected' : 'Choose File'}
+                  </label>
                 </div>
                 <input
                   type="text"
                   placeholder="Image URL"
                   value={img.url}
                   onChange={e => handleImageChange(idx, 'url', e.target.value)}
-                  style={{ flex: 1, padding: 4 }}
+                  style={{
+                    flex: '2 1 0',
+                    padding: '10px 12px',
+                    borderRadius: 8,
+                    border: '1.5px solid #c7d2fe',
+                    fontSize: 15,
+                    background: '#fff',
+                    marginBottom: 0,
+                    width: '100%',
+                  }}
                 />
                 <input
                   type="text"
                   placeholder="Label"
                   value={img.label}
                   onChange={e => handleImageChange(idx, 'label', e.target.value)}
-                  required
-                  style={{ flex: 1, padding: 4 }}
+                  style={{
+                    flex: '1 1 0',
+                    padding: '10px 12px',
+                    borderRadius: 8,
+                    border: '1.5px solid #c7d2fe',
+                    fontSize: 15,
+                    background: '#fff',
+                    marginBottom: 0,
+                    width: '100%',
+                  }}
                 />
-                <label style={{ marginLeft: 8 }}>
+                <div style={{ flex: '0 0 50px', display: 'flex', justifyContent: 'center', alignItems: 'center' }}>
                   <input
                     type="radio"
                     checked={img.isCorrect}
                     onChange={() => handleSetCorrect(idx)}
-                  /> Correct
-                </label>
-                {newGoalImages.length > 2 && (
-                  <button type="button" onClick={() => handleRemoveImage(idx)} style={{ marginLeft: 8, padding: '2px 6px' }}>Remove</button>
-                )}
+                    title="Mark as correct"
+                    style={{ accentColor: '#6366f1', width: 20, height: 20 }}
+                  />
+                </div>
+                <div style={{ flex: '0 0 32px', display: 'flex', justifyContent: 'center', alignItems: 'center' }}>
+                  <button
+                    type="button"
+                    onClick={() => handleRemoveImage(idx)}
+                    style={{
+                      color: '#f43f5e',
+                      fontWeight: 700,
+                      border: 'none',
+                      background: 'none',
+                      fontSize: 22,
+                      cursor: 'pointer',
+                      padding: 0,
+                      margin: 0,
+                      width: 28,
+                      height: 28,
+                      borderRadius: 6,
+                      transition: 'background 0.15s',
+                    }}
+                    title="Remove image"
+                    onMouseOver={e => e.currentTarget.style.background = '#fee2e2'}
+                    onMouseOut={e => e.currentTarget.style.background = 'none'}
+                  >
+                    ×
+                  </button>
+                </div>
               </div>
             ))}
-            <button type="button" onClick={handleAddImage} style={{ marginTop: 4 }}>+ Add Image</button>
+            <button
+              type="button"
+              onClick={handleAddImage}
+              style={{
+                marginTop: 4,
+                padding: '10px 22px',
+                background: 'linear-gradient(90deg, #6366f1 0%, #a5b4fc 100%)',
+                color: '#fff',
+                border: 'none',
+                borderRadius: 8,
+                fontWeight: 700,
+                fontSize: 16,
+                boxShadow: '0 2px 8px rgba(99,102,241,0.10)',
+                cursor: 'pointer',
+                transition: 'transform 0.1s, background 0.2s',
+              }}
+              onMouseDown={e => e.currentTarget.style.transform = 'scale(0.97)'}
+              onMouseUp={e => e.currentTarget.style.transform = 'scale(1)'}
+              onMouseOver={e => e.currentTarget.style.background = 'linear-gradient(90deg, #4f46e5 0%, #818cf8 100%)'}
+              onMouseOut={e => e.currentTarget.style.background = 'linear-gradient(90deg, #6366f1 0%, #a5b4fc 100%)'}
+            >
+              + Add Image
+            </button>
           </div>
-          <div style={{ display: 'flex', gap: 8 }}>
-            <button type="submit">Create Goal</button>
-            <button type="button" onClick={onClose}>Cancel</button>
+          <div style={{ display: 'flex', gap: 14, marginTop: 22, justifyContent: 'center' }}>
+            <button
+              type="submit"
+              style={{
+                padding: '12px 28px',
+                background: 'linear-gradient(90deg, #10b981 0%, #6ee7b7 100%)',
+                color: '#fff',
+                border: 'none',
+                borderRadius: 10,
+                fontWeight: 700,
+                fontSize: 18,
+                boxShadow: '0 2px 8px rgba(16,185,129,0.10)',
+                cursor: 'pointer',
+                transition: 'transform 0.1s, background 0.2s',
+              }}
+              onMouseDown={e => e.currentTarget.style.transform = 'scale(0.97)'}
+              onMouseUp={e => e.currentTarget.style.transform = 'scale(1)'}
+              onMouseOver={e => e.currentTarget.style.background = 'linear-gradient(90deg, #059669 0%, #34d399 100%)'}
+              onMouseOut={e => e.currentTarget.style.background = 'linear-gradient(90deg, #10b981 0%, #6ee7b7 100%)'}
+            >
+              Create Goal
+            </button>
+            <button
+              type="button"
+              onClick={onClose}
+              style={{
+                padding: '12px 28px',
+                background: '#fff',
+                color: '#374151',
+                border: '2px solid #d1d5db',
+                fontWeight: 700,
+                fontSize: 18,
+                borderRadius: 10,
+                boxShadow: 'none',
+                transition: 'transform 0.1s, background 0.2s',
+                cursor: 'pointer',
+              }}
+              onMouseDown={e => e.currentTarget.style.transform = 'scale(0.97)'}
+              onMouseUp={e => e.currentTarget.style.transform = 'scale(1)'}
+              onMouseOver={e => e.currentTarget.style.background = '#f3f4f6'}
+              onMouseOut={e => e.currentTarget.style.background = '#fff'}
+            >
+              Cancel
+            </button>
           </div>
         </form>
 
