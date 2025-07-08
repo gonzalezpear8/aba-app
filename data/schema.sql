@@ -1,75 +1,75 @@
--- users table
+-- Users (admin, therapist)
 CREATE TABLE IF NOT EXISTS users (
     id SERIAL PRIMARY KEY,
     username VARCHAR(50) UNIQUE NOT NULL,
     password VARCHAR(255) NOT NULL,
-    role VARCHAR(20) NOT NULL CHECK (role IN ('admin', 'therapist', 'patient')),
-    created_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP
+    role VARCHAR(20) NOT NULL CHECK (role IN ('admin', 'therapist')),
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
 );
 
--- therapists table
-CREATE TABLE IF NOT EXISTS therapists (
-    id SERIAL PRIMARY KEY,
-    name VARCHAR(100) NOT NULL,
-    user_id INTEGER UNIQUE NOT NULL,
-    FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE
-);
-
--- patients table
+-- Patients
 CREATE TABLE IF NOT EXISTS patients (
     id SERIAL PRIMARY KEY,
     name VARCHAR(100) NOT NULL,
-    dob DATE NOT NULL,
-    goals TEXT,
-    therapist_id INTEGER,
-    user_id INTEGER UNIQUE NOT NULL,
-    FOREIGN KEY (therapist_id) REFERENCES therapists(id) ON DELETE SET NULL,
-    FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE
+    dob DATE,
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
 );
 
--- sessions table
+-- Therapist-Patient Assignment
+CREATE TABLE IF NOT EXISTS therapist_patient (
+    id SERIAL PRIMARY KEY,
+    therapist_id INTEGER REFERENCES users(id) ON DELETE CASCADE,
+    patient_id INTEGER REFERENCES patients(id) ON DELETE CASCADE,
+    UNIQUE (therapist_id, patient_id)
+);
+
+-- Goals Repository
+CREATE TABLE IF NOT EXISTS goals (
+    id SERIAL PRIMARY KEY,
+    name VARCHAR(100) NOT NULL,
+    description TEXT,
+    created_by INTEGER REFERENCES users(id),
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+);
+
+-- Images for Goals
+CREATE TABLE IF NOT EXISTS goal_images (
+    id SERIAL PRIMARY KEY,
+    goal_id INTEGER REFERENCES goals(id) ON DELETE CASCADE,
+    image_url TEXT NOT NULL,
+    label VARCHAR(100),
+    is_correct BOOLEAN DEFAULT false
+);
+
+-- Assigned Goals to Patients
+CREATE TABLE IF NOT EXISTS patient_goals (
+    id SERIAL PRIMARY KEY,
+    patient_id INTEGER REFERENCES patients(id) ON DELETE CASCADE,
+    goal_id INTEGER REFERENCES goals(id) ON DELETE CASCADE,
+    assigned_by INTEGER REFERENCES users(id),
+    assigned_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+);
+
+-- Sessions (Goal Running)
 CREATE TABLE IF NOT EXISTS sessions (
     id SERIAL PRIMARY KEY,
-    patient_id INTEGER NOT NULL,
-    therapist_id INTEGER NOT NULL,
-    date TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP,
-    notes TEXT,
-    FOREIGN KEY (patient_id) REFERENCES patients(id) ON DELETE CASCADE,
-    FOREIGN KEY (therapist_id) REFERENCES therapists(id) ON DELETE CASCADE
+    patient_id INTEGER REFERENCES patients(id) ON DELETE CASCADE,
+    therapist_id INTEGER REFERENCES users(id) ON DELETE CASCADE,
+    goal_id INTEGER REFERENCES goals(id) ON DELETE CASCADE,
+    started_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
 );
 
--- programs table
-CREATE TABLE IF NOT EXISTS programs (
-    id SERIAL PRIMARY KEY,
-    name VARCHAR(100) NOT NULL,
-    description TEXT,
-    created_by INTEGER NOT NULL,
-    created_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP,
-    FOREIGN KEY (created_by) REFERENCES therapists(id) ON DELETE CASCADE
-);
-
--- targets table
-CREATE TABLE IF NOT EXISTS targets (
-    id SERIAL PRIMARY KEY,
-    program_id INTEGER NOT NULL,
-    name VARCHAR(100) NOT NULL,
-    description TEXT,
-    criteria TEXT,
-    FOREIGN KEY (program_id) REFERENCES programs(id) ON DELETE CASCADE
-);
-
--- session_results table
+-- Session Results
 CREATE TABLE IF NOT EXISTS session_results (
     id SERIAL PRIMARY KEY,
-    session_id INTEGER NOT NULL,
-    target_id INTEGER NOT NULL,
-    result BOOLEAN NOT NULL,
-    notes TEXT,
-    FOREIGN KEY (session_id) REFERENCES sessions(id) ON DELETE CASCADE,
-    FOREIGN KEY (target_id) REFERENCES targets(id) ON DELETE CASCADE
+    session_id INTEGER REFERENCES sessions(id) ON DELETE CASCADE,
+    image_id INTEGER REFERENCES goal_images(id) ON DELETE CASCADE,
+    selected_image_id INTEGER REFERENCES goal_images(id),
+    correct BOOLEAN,
+    responded_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
 );
 
--- Create initial admin user (password: admin123)
-INSERT INTO users (username, password, role) 
+-- Create initial admin user (password: admin123, hashed with bcrypt for example)
+INSERT INTO users (username, password, role)
 VALUES ('admin', '$2b$10$rMbGJRzp6qQrBj.FiBI0H.tFYG8kxGBqIhqJHNqnU4DPWt0yRg2Hy', 'admin')
 ON CONFLICT (username) DO NOTHING;
